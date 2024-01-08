@@ -23,11 +23,20 @@ class OrderCreatedHandlerTest {
     }
 
     @Test
-    void listen() {
+    void testListenSuccess() throws Exception {
         OrderCreatedMessage orderCreatedMessage = OrderCreatedMessage.builder()
                 .orderId(UUID.randomUUID())
                 .payload("some_payload").build();
         orderCreatedHandler.listen(orderCreatedMessage);
+        verify(dispatcherService, times(1)).process(orderCreatedMessage);
+    }
+    @Test
+    void testListenThrowsException() throws Exception{
+        OrderCreatedMessage orderCreatedMessage = OrderCreatedMessage.builder()
+                .orderId(UUID.randomUUID())
+                .payload("some_payload").build();
+        doThrow(new RuntimeException()).when(this.dispatcherService).process(any(OrderCreatedMessage.class));
+        assertThrows(RuntimeException.class, ()-> orderCreatedHandler.listen(orderCreatedMessage));
         verify(dispatcherService, times(1)).process(orderCreatedMessage);
     }
 }

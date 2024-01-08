@@ -3,13 +3,13 @@ package mozt.dev.kafkaexampledispatch.configuration;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import mozt.dev.kafkaexampledispatch.message.OrderCreatedMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -35,5 +35,19 @@ public class DispatchConfiguration {
         configs.put(JsonDeserializer.VALUE_DEFAULT_TYPE, OrderCreatedMessage.class);
         configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return new DefaultKafkaConsumerFactory<String, Object>(configs);
+    }
+
+    @Bean
+    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<String, Object>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, Object> producerFactory(@Value("${kafka.bootstrap-server.addresses}") String kafkaServer) {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
+        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaProducerFactory<String, Object>(configs);
     }
 }

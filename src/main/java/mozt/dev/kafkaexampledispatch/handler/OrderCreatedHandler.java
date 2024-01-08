@@ -10,14 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OrderCreatedHandler {
+    public static final String TOPIC_ORDER_CREATED = "order.created";
     private final DispatcherService dispatcherService;
 
     @KafkaListener(
             id = "consumerClient",
-            topics="order.created", //. or _ between words is best practise
+            topics= TOPIC_ORDER_CREATED, //. or _ between words is best practise
             groupId = "kafka.dispatch.order.created.consumer"
     )
-    public void listen(OrderCreatedMessage orderCreatedMessage){
+    public void listen(OrderCreatedMessage orderCreatedMessage) throws Exception{
         log.info("Received Message is: payload: " + orderCreatedMessage.toString());
         dispatcherService.process(orderCreatedMessage);
     }
